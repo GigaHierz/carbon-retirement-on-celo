@@ -62,6 +62,8 @@ import offsetHelper from "../abis/OffsetHelper.json";
 If working directly with the [OffsetHelper](https://github.com/ToucanProtocol/OffsetHelper/blob/main/docs/OffsetHelper.md) Contract, we will use the `useContractWrite()` hook form [wagmi](https://wagmi.sh/react/hooks/useContractWrite) to interact with the contract.
 
 ```typescript
+import { usePrepareContractWrite, useContractWrite } from "wagmi";
+
 const { config } = usePrepareContractWrite({
   address: offsetHelper.address,
   abi: offsetHelper.abi,
@@ -75,14 +77,16 @@ const { data, isLoading, isSuccess, write } = useContractWrite(config);
 As Arguments for the function, you will need the current address of the pool token, that you want to retire, like NCT, which you can find on [this page](https://app.toucan.earth/contracts) with all deployed Toucan contracts. You will also need to input the amount of tokens you wish to retire.
 
 ```javascript
+import { useState } from "react";
+
 const NCTaddress = 0xfb60a08855389f3c0a66b29ab9efa911ed5cbcb5;
-const [amountPoolTokens, setAmountPoolTokens] = useState(0);
+const [amountPoolToken, setAmountPoolToken] = useState(0);
 
 const { config } = usePrepareContractWrite({
   address: offsetHelper.address,
   abi: offsetHelper.abi,
   functionName: "autoOffsetPoolToken",
-  args: [NCTaddress, amountPoolTokens],
+  args: [NCTaddress, amountPoolToken],
 });
 
 const { data, isLoading, isSuccess, write } = useContractWrite(config);
@@ -136,12 +140,12 @@ const remainingTCO2 = await bct.tokenBalances(tco2Address);
 
 ```typescript
 const NCTaddress = 0xfb60a08855389f3c0a66b29ab9efa911ed5cbcb5;
-const [amountPoolTokens, setAmountPoolTokens] = useState(0);
+const [amountPoolToken, setAmountPoolToken] = useState(0);
 const offsetHelper = toucan.getOffsetHelperContract();
 
 const retireCarbon = async () => {
   const NCTaddress = 0xfb60a08855389f3c0a66b29ab9efa911ed5cbcb5;
-  await offsetHelper.autoOffsetPoolToken(NCTaddress, amountPoolTokens);
+  await offsetHelper.autoOffsetPoolToken(NCTaddress, amountPoolToken);
 };
 ```
 
