@@ -1,5 +1,11 @@
 # Tutorial for Carbon retirement on Celo
 
+In this Tutorial we will learn how to buid a carbon positive app on Celo, using Celo Composer and the Toucan SDK.
+
+In the end the App will look like this.
+
+![app with an input for how many tonnes to retire. and a button to retire](./assets/example-app.jpg)
+
 1. Install [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter)
 
 Now we have to options, depending on how far I finish it.
@@ -10,10 +16,10 @@ Now we have to options, depending on how far I finish it.
    2.1.1. AutoOffset Pool Tokens  
    2.1.2. Get Contract  
    2.1.3. Call Contract function  
-   2.2. Retiring carbon credits with the Toucan SDK
+   2.2. Retiring carbon credits with the Toucan SDK  
    2.2.1. Install the SDK  
-   2.2.2. Get Toucan Client
-   2.2.3. Interact with Toucan's Contracts
+   2.2.2. Get Toucan Client  
+   2.2.3. Interact with Toucan's Contracts  
    2.2.4. Retire Tokens with the OffsetHelper Contract
 
 3. Add the frontend
