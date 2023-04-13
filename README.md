@@ -41,6 +41,8 @@ import { ToucanClient } from "toucan-sdk";
 import { useProvider, useSigner } from "wagmi";
 const provider = useProvider();
 const { data: signer, isError, isLoading } = useSigner();
+
+
 const toucan = new ToucanClient("alfajores", provider, signer);
 ```
 
