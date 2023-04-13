@@ -9,8 +9,7 @@ In this Tutorial we will learn how to retire carbon credits on Celo, using Celo 
    2.2. Get Toucan Client  
    2.3. Redeem Tokens form a PoolContract (NCT/BCT)  
    2.4. Retire your TCO2s  
-   2.5.
-   2.4. Find more functionalities
+   2.5. Find more functionalities
 
 ## 1. Install [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter)
 
@@ -40,8 +39,8 @@ Instantiate the ToucanClient and set a signer & provider to interact with our in
 import { ToucanClient } from "toucan-sdk";
 import { useProvider, useSigner } from "wagmi";
 const provider = useProvider();
-const { data: signer, isError, isLoading } = useSigner();
 
+const { data: signer, isError, isLoading } = useSigner();
 
 const toucan = new ToucanClient("alfajores", provider, signer);
 ```
@@ -81,6 +80,13 @@ tc02.retire(parseEther("1.0"));
 
 If you want to create certificates afterwards, you can als just do that with [`mintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/retirement-certificates#mintcertificate) from the RetirementCertificates Contract.
 
+```typescript
+const nct = toucan.getPoolContract("NCT");
+const tco2 = toucan.getTCO2Contract(tco2Address);
+const registry = toucan.getRegistryContract();
+const remainingTCO2 = await bct.tokenBalances(tco2Address);
+```
+
 ### 2.4. Interact with Toucan's Contracts
 
 You can find all deployed contracts on the [Toucan App](https://app.toucan.earth/contracts).
@@ -94,18 +100,7 @@ const registry = toucan.getRegistryContract();
 const remainingTCO2 = await nct.tokenBalances(tco2Address);
 ```
 
-### 2.5. Get a certificate
-
-If you want to create certificates afterwards, you can als just do that with [`mintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/retirement-certificates#mintcertificate) from the RetirementCertificates Contract.
-
-```typescript
-const nct = toucan.getPoolContract("NCT");
-const tco2 = toucan.getTCO2Contract(tco2Address);
-const registry = toucan.getRegistryContract();
-const remainingTCO2 = await bct.tokenBalances(tco2Address);
-```
-
-### 2.6. Find more functionalities
+### 2.5. Find more functionalities
 
 Please check the table for link to the docs for each specific contract. You can also find all current deployed contacts on the [Toucan App](https://app.toucan.earth/contracts) and in our [GitHub repo](https://github.com/ToucanProtocol/contracts/tree/main/artifacts).
 
