@@ -20,9 +20,11 @@ In this Tutorial we will learn how retire carbon credits on Celo, using Celo Com
     2.2.3. Get a certificate  
     2.2.4. Find more functionalities
 
+3. Use a the SDK to query the subgraph
+
 ## 1. Install [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter)
 
-To get started building out app, we will use the [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter) that already comes in with the wallet integration, wagmi hoogs and tailwind for styling.
+To get started building out app, we will use the [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter) that already comes in with the wallet integration, wagmi hooks and tailwind for styling.
 
 ## 2. Retire Carbon Credits
 
@@ -156,7 +158,7 @@ const { data, isLoading, isSuccess, write } = useContractWrite(config);
 
 ### 2.2.2. Retire your TCO2s
 
-After **_Redeeming_** your pool tokens for TCO2s you will be able to retire them. You can only retire **TCO2s** tokens. You can either choose to simply [`retire`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retire) or if you would like to retire for a third party use the [`retireFrom`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retirefrom) function. Lastly you can also already get a certificate created with [` retireAndMintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retireandmintcertificate). - [Example ABI](https://github.com/ToucanProtocol/contracts/blob/main/artifacts/staging/celo-alfajores/ToucanCarbonOffsets.json)
+After **_Redeeming_** your pool tokens for TCO2s you will be able to retire them. You can only retire **TCO2s** tokens. You can either choose to simply [`retire`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retire). If you would like to retire for a third party use the [`retireFrom`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retirefrom) function. Lastly you can also already get a certificate created with [` retireAndMintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retireandmintcertificate). - [Example ABI](https://github.com/ToucanProtocol/contracts/blob/main/artifacts/staging/celo-alfajores/ToucanCarbonOffsets.json)
 
 The first thing you will have to do, will be to get the address of your TCO2 token. You will have saved that as return value form `autoRedeem2` or from when you selected the tokens.
 
@@ -192,20 +194,64 @@ Please check the table for link to the docs for each specific contract. You can 
 | [Toucan Carbon Offset](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2)                       | `retireAndMintCertificate` | Just as retire() this retires an amount of TCO2, but after the Retired event is emited this function mints a certificate passing the given retirementEventId.                                                                                                                                            |
 | [Retirement Certificates](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/retirement-certificates) | `mintCertificate`          | Mints a new RetirementCertificates NFT based on existent Retired events. The function can either be called by a valid TCO2 contract (in its retireAndMintCertificate() function) or by a user who owns Retired events.                                                                                   |
 
-As Arguments for the function, you will need the current address of the pool token, that you want to retire, like NCT, which you can find on [this page](https://app.toucan.earth/contracts) with all deployed Toucan contracts. You will also need to input the amount of tokens you wish to retire. You can read more upon them in our [documentation](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts).
+3. Use a the SDK to query the subgraph
 
-```javascript
-import { useState } from "react";
+Find all Toucan Subgraphs in our [Documentation](https://docs.toucan.earth/toucan/dev-resources/subgraph).
 
-const NCTaddress = 0xfb60a08855389f3c0a66b29ab9efa911ed5cbcb5;
-const [amountPoolToken, setAmountPoolToken] = useState(0);
+There's a lot more other pre-built subgraph queries that I could show you, but what I really want to show you is the `fetchCustomQuery` method.
 
-const { config } = usePrepareContractWrite({
-  address: offsetHelper.address,
-  abi: offsetHelper.abi,
-  functionName: "autoOffsetPoolToken",
-  args: [NCTaddress, amountPoolToken],
-});
+This allows you to fetch with your own queries and can be very powerful if you know graphQL.
 
-const { data, isLoading, isSuccess, write } = useContractWrite(config);
+- Getting your redeemed Tokens (TCO2s) you hold - useful for retirement of carbon credits.
+
+```typescript
+import { gql } from "@urql/core";
+import { ToucanClient } from "toucan-sdk";
+
+const provider = useProvider();
+const { data: signer, isError, isLoading } = useSigner();
+
+const toucan = new ToucanClient("alfajores");
+const query = gql`
+  query ($id: String) {
+    user(id: $id) {
+      redeemsCreated {
+        token {
+          address
+          name
+        }
+      }
+    }
+  }
+`;
+
+const result = await toucan.fetchCustomQuery(query, { id: "Ox000" });
+```
+
+- Getting all infos on a project of a Carbon Credit
+
+```typescript
+import { gql } from "@urql/core";
+import { ToucanClient } from "toucan-sdk";
+
+const provider = useProvider();
+const { data: signer, isError, isLoading } = useSigner();
+
+const toucan = new ToucanClient("alfajores");
+
+const query = gql`
+  query ($id: String) {
+    project(id: $id) {
+      projectId
+      region
+      standard
+      methodology
+      vintages {
+        id
+      }
+    }
+  }
+`;
+
+const result = await toucan.fetchCustomQuery(query, { id: "1" });
 ```
