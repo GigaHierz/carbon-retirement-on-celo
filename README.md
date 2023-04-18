@@ -2,39 +2,72 @@
 
 In this Tutorial we will learn how retire carbon credits on Celo, using Celo Composer and the Toucan SDK.
 
-1. Install [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter)
+In the end out app will look like this:
+![Celo app with a retirement Button](./assets/example-app.jpg)
 
+1. Install Celo-Composer
 2. Retire Carbon Credits: Either use the Toucan SDK or interact directly with the Toucan Contracts
 
-   2.1. Retiring carbon credits with the Toucan SDK  
-    2.1.1. Install the SDK  
-    2.1.2. Get Toucan Client  
-    2.1.3. Redeem Tokens form a PoolContract (e.g. NCT)  
-    2.1.4. Retire your TCO2s  
-    2.1.5. Get a certificate  
-    2.1.6. Interact with Toucan's Contracts
+   2. Install the SDK  
+      2.2. Get Toucan Client  
+      2.3. Redeem Tokens form a PoolContract (e.g. NCT)  
+      2.4. Retire your TCO2s  
+      2.5. Get a certificate  
+      2.6. Interact with Toucan's Contracts
 
-   2.2. Retire carbon credits with Toucans Contracts  
-    2.2.1. Redeem Tokens form a PoolContract (e.g. NCT)  
-    2.2.2. Retire your TCO2s  
-    2.2.3. Get a certificate  
-    2.2.4. Find more functionalities
+3. Creating a list of our retirements
 
-3. Use a the SDK to query the subgraph
+## 1. Install [Celo-Composer](https://docs.celo.org/blog/tutorials/building-your-first-smart-contract-web-dapp-with-celo-composer)
 
-## 1. Install [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter)
+We will use [Celo-Composer](https://docs.celo.org/blog/tutorials/building-your-first-smart-contract-web-dapp-with-celo-composer) to quick-start our web3 application. It already comes with several wallet integrations using [rainbow-kit](https://www.rainbowkit.com), [wagmi](https://wagmi.sh) for easy interactions with the blockchain and [tailwind](https://tailwindcss.com).
 
-To get started building out app, we will use the [Celo-Composer](https://docs.celo.org/blog/2022/02/21/introduction-to-celo-progressive-dappstarter) that already comes in with the wallet integration, wagmi hooks and tailwind for styling.
+```
+npx @celo/celo-composer create
+```
+
+To create a simple example project I just chose the default.
+
+![image of the options selected](./assets/composer-selection.jpeg)
+
+Great. Now let's open the project in your favorite IDE (e.g. VS Code).
 
 ## 2. Retire Carbon Credits
 
-Learn how to retire carbon credits on Celo with using the Toucan SDK or just interacting with Toucan contracts.
+Next we are going to retire carbon credits on Celo with using the Toucan SDK.
 
-### 2.1. Retiring carbon credits with the Toucan SDK
+## 2.1. Install the SDK
 
-Using the Toucan SDK to retire Carbon Credits
+First you will navigate into the react-app.
 
-### 2.1.1. Install the SDK
+```
+cd packages/react-app/
+```
+
+Here we first want to install all dependencies with
+
+```
+npm i
+```
+
+or
+
+```
+yarn;
+```
+
+Let's start the App and see if everything is running.
+
+```
+npm run dev
+```
+
+or
+
+```
+yarn run dev
+```
+
+Okayyyyyy. And now we can add the Toucan SDK!
 
 ```
 npm i toucan-sdk
@@ -46,212 +79,269 @@ or
 yarn add toucan-sdk
 ```
 
-### 2.1.2. Get Toucan Client
+## 2.2. Get Toucan Client
 
-Instantiate the ToucanClient and set a signer & provider to interact with our infrastructure. We can use the signer & provider from the wagmi library
+When using the Toucan SDK we want to first instantiate the ToucanClient and set a signer & provider to interact with our infrastructure. We can use the signer & provider from the wagmi library. For interacting with the Graph, no provider or signer is needed though. But we will talk about that [later](#3-use-a-the-sdk-to-query-the-subgraph).
+
+So in the `index.tsx` file we will add the imports to the top:
 
 ```typescript
 import { ToucanClient } from "toucan-sdk";
 import { useProvider, useSigner } from "wagmi";
+```
 
+And this part into our function body
+
+```typescript
 const provider = useProvider();
 const { data: signer, isError, isLoading } = useSigner();
 
-const toucan = new ToucanClient("alfajores", provider, signer);
+const toucan = new ToucanClient("alfajores", provider);
+signer && toucan.setSigner(signer);
 ```
 
-### 2.1.3. Redeem Tokens form a PoolContract (e.g. NCT)
+<details>
+<summary>Our code will look like this now:</summary>
 
-First you should get some pool tokens (e.g.NCTs) or TCO2 from the [Toucan Faucet](https://faucet.toucan.earth/). If you have NCTs, you will first have to redeem them for TCO2s.
+```javascript
+import { ToucanClient } from "toucan-sdk";
+import { useProvider, useSigner } from "wagmi";
 
-You will have to decide if you want
+export default function Home() {
+  const provider = useProvider();
+  const { data: signer, isError, isLoading } = useSigner();
 
-- to auto-redeem them with [`redeemAuto2`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#redeemauto2), where they are exchanged for the lowest ranking TCO2s. Auto-redeem returns the addresses of the redeemed TCO2s, which you need for the next step. As Arguments for the function, you will need the current address of the pool token, that you want to retire, like NCT, which you can find on [this page](https://app.toucan.earth/contracts) with all deployed Toucan contracts. You will also need to input the amount of tokens you wish to retire. You can read more upon them in our [documentation](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts).
+  const toucan = new ToucanClient("alfajores", provider);
+  signer && toucan.setSigner(signer);
+  return (
+    <div>
+      <div className="h1">
+        There you go... a canvas for your next Celo project!
+      </div>
+    </div>
+  );
+}
+```
+
+</details>
+
+## 2.3. Redeem Tokens form a PoolContract (e.g. NCT)
+
+First you should get some pool tokens (e.g.NCTs) or TCO2 from the [Toucan Faucet](https://faucet.toucan.earth/). Normally you would get NCT, as that the tokens you can buy in an exchange. You will only have TCO2 tokens, if you tokenzied carbon credits yourself or if you have already redeemed the NCTs for TCO2s. So in this example we will start with NCTs.
+
+| :herb: Get some Nature Carbon Tonnes (NCT) before you continue form the [Toucan Faucet](https://faucet.toucan.earth/) . Make sure you have CELO to pay the gas fee for the withdrawel, you can get some from the [Celo Faucet](https://faucet.celo.org/alfajores). :herb: |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+
+You can auto-redeem them with [`redeemAuto2`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#redeemauto2), where they are exchanged for the lowest ranking TCO2s. Auto-redeem returns the addresses of the redeemed TCO2s, which you need for the next step. As Arguments for the function, you will need the current address of the pool symbol, that you want to retire, like "NCT". You will also need to input the amount of tokens you wish to retire. You can read more upon the functions in our [documentation](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts).
+
+If you want to choose the TCO2s that you want to retire, you can get a list of all TCO2 with `getScoredTCO2s` and then select the ones you prefer. When getting the highest TCO2, make sure that the balance of the token is not 0. When choosing and redeem them with `redemMany`. For this Toucan Protocol takes fees. You can calculate the fee beforehand with `calculateRedeemFees`.
+
+But in the case we stay simple like this:
 
 ```typescript
-const nct = toucan.getPoolContract("NCT");
-nct.redeemAuto2(parseEther("1.0"));
+toucan.redeemAuto2("NCT", parseEther("1"));
 ```
 
-- or you can get a list of all TCO2 with [`getScoredTCO2s`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#getscoredtco2s) and then select the ones you prefer. When getting the highest TCO2, make sure that the balance of the token is not 0. When choosing and redeem them with [`redemMany`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#redeemmany). For this Toucan Protocol takes [fees](https://docs.toucan.earth/toucan/pool/protocol-fees). You can calculate the fee beforehand with [`calculateRedeemFees`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#calculateredeemfees).
+But let's put that code in a function and add a button to trigger it, so we can see it in action!! we also want to store the return value, the TCO2 address in a variable, as we will want to use it in the next step.
+
+<details>
+<summary>Our code should look like this now: </summary>
 
 ```typescript
-const nct = toucan.getPoolContract("NCT");
-nct.tokenBalances(tco2Address);
+import { parseEther } from "ethers/lib/utils.js";
+import { ToucanClient } from "toucan-sdk";
+import { useProvider, useSigner } from "wagmi";
+
+export default function Home() {
+  const provider = useProvider();
+  const { data: signer, isError, isLoading } = useSigner();
+  const toucan = new ToucanClient("alfajores", provider);
+  signer && toucan.setSigner(signer);
+  // we will store our return value here
+  const [tco2address, setTco2address] = useState("");
+
+  const redeemPoolToken = async (): Promise<void> => {
+    const redeemedTokenAddress = await toucan.redeemAuto2(
+      "NCT",
+      parseEther("1")
+    );
+    redeemedTokenAddress && setTco2address(redeemedTokenAddress[0].address);
+  };
+
+  return (
+    <div>
+      <div className="h1">
+        <div>
+          <button
+            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={() => redeemPoolToken()}
+          >
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3"></span>
+            {"Redeem Tokens"}
+          </button>
+        </div>{" "}
+      </div>
+    </div>
+  );
+}
 ```
 
-### 2.1.4. Retire your TCO2s
+</details>
+
+But you will probably get an error like this:
+![Error: No signer yet](./assets/error-no-signer.jpeg)
+
+And that makes sense, because we are not yet connected with our wallet. So let's do that.
+
+| :eyeglasses: Try it out and check the transaction on [Celoscan](https://alfajores.celoscan.io) :eyeglasses: |
+| ----------------------------------------------------------------------------------------------------------- |
+
+## 2.4. Retire your TCO2s
 
 After **_Redeeming_** your pool tokens for TCO2s you will be able to retire them. You can only retire **TCO2s** tokens. You can either choose to simply [`retire`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retire) or if you would like to retire for a third party use the [`retireFrom`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retirefrom) function. Lastly you can also already get a certificate created with [` retireAndMintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retireandmintcertificate). - [Example ABI](https://github.com/ToucanProtocol/contracts/blob/main/artifacts/staging/celo-alfajores/ToucanCarbonOffsets.json)
 
-The first thing you will have to do, will be to get the address of your TCO2 token. You will have saved that as return value form `autoRedeem2` or from when you selected the tokens.
+The first thing you will have to do, will be to get the address of your TCO2 token. You will have saved that as return value form `autoRedeem2` or from when you selected the tokens. And now we can retire our token, with adding this line of code to our redeem function.
 
 ```typescript
-const tco2 = toucan.getTCO2Contract(tco2Address);
-tc02.retire(parseEther("1.0"));
+await toucan.retire(parseEther("1.0"), tco2Address);
 ```
 
-### 2.1.5. Get a certificate
+Let's rename our function to `` as well as the button to match the actual action that we are doing.
 
-If you want to create certificates afterwards, you can als just do that with [`mintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/retirement-certificates#mintcertificate) from the RetirementCertificates Contract.
+<details>
+<summary>Our code should look like this now: </summary>
 
-```typescript
-const nct = toucan.getPoolContract("NCT");
-const tco2 = toucan.getTCO2Contract(tco2Address);
-const registry = toucan.getRegistryContract();
-const remainingTCO2 = await bct.tokenBalances(tco2Address);
-```
-
-### 2.1.6. Interact with Toucan's Contracts
-
-You can find all deployed contracts on the [Toucan App](https://app.toucan.earth/contracts).
-
-Now you can interact with them.
-
-```typescript
-const nct = toucan.getPoolContract("NCT");
-const tco2 = toucan.getTCO2Contract(tco2Address);
-const registry = toucan.getRegistryContract();
-const remainingTCO2 = await nct.tokenBalances(tco2Address);
-```
-
-### 2.2. Retire carbon credits with Toucans Contracts
-
-For interacting directly with the [Toucans Contracts](https://app.toucan.earth/contracts), we will use the `useContractWrite()` hook form [wagmi](https://wagmi.sh/react/hooks/useContractWrite).
-
-You can find all contract ABIs and addresses in the public [GitHub repo](https://github.com/ToucanProtocol/contracts/tree/main/artifacts) for all Toucan Contracts.
-
-### 2.2.1. Redeem Tokens form a PoolContract (e.g. NCT)
-
-First you should get some pool tokens (e.g.NCTs) or TCO2 from the [Toucan Faucet](https://faucet.toucan.earth/). If you have NCTs, you will first have to redeem them for TCO2s.
-
-You will have to decide if you want
-
-- to auto-redeem them with [`redeemAuto2`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#redeemauto2), where they are exchanged for the lowest ranking TCO2s. Auto-redeem returns the addresses of the redeemed TCO2s, which you need for the next step. As Arguments for the function, you will need the current address of the pool token, that you want to retire, like NCT, which you can find on [this page](https://app.toucan.earth/contracts) with all deployed Toucan contracts. You will also need to input the amount of tokens you wish to retire. You can read more upon them in our [documentation](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts).
-
-```typescript
-import { usePrepareContractWrite, useContractWrite } from "wagmi";
-import natureCarbonTonne from "../abis/NatureCarbonTonne.json";
-import { parseEther } from "ethers/lib/utils";
-const { config } = usePrepareContractWrite({
-  address: natureCarbonTonne.address,
-  abi: natureCarbonTonne.abi,
-  functionName: "redeemAuto2",
-  args: [parseEther("1.0")],
-});
-const { data, isLoading, isSuccess, write } = useContractWrite(config);
-```
-
-- or you can get a list of all TCO2 with [`getScoredTCO2s`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#getscoredtco2s) and then select the ones you prefer. When getting the highest TCO2, make sure that the balance of the token is not 0. When choosing and redeem them with [`redemMany`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#redeemmany). For this Toucan Protocol takes [fees](https://docs.toucan.earth/toucan/pool/protocol-fees). You can calculate the fee beforehand with [`calculateRedeemFees`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#calculateredeemfees).
-
-```typescript
-import { usePrepareContractWrite, useContractWrite } from "wagmi";
-import natureCarbonTonne from "../abis/NatureCarbonTonne.json";
-const nct = usePrepareContractWrite({
-  address: natureCarbonTonne.address,
-  abi: natureCarbonTonne.abi,
-  functionName: "tokenBalances",
-  args: [tco2Address],
-});
-const { data, isLoading, isSuccess, write } = useContractWrite(config);
-```
-
-### 2.2.2. Retire your TCO2s
-
-After **_Redeeming_** your pool tokens for TCO2s you will be able to retire them. You can only retire **TCO2s** tokens. You can either choose to simply [`retire`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retire). If you would like to retire for a third party use the [`retireFrom`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retirefrom) function. Lastly you can also already get a certificate created with [` retireAndMintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retireandmintcertificate). - [Example ABI](https://github.com/ToucanProtocol/contracts/blob/main/artifacts/staging/celo-alfajores/ToucanCarbonOffsets.json)
-
-The first thing you will have to do, will be to get the address of your TCO2 token. You will have saved that as return value form `autoRedeem2` or from when you selected the tokens.
-
-```typescript
-import { usePrepareContractWrite, useContractWrite } from "wagmi";
-import toucanCarbonOffset from "../abis/ToucanCarbonOffset.json";
-import { parseEther } from "ethers/lib/utils";
-const { config } = usePrepareContractWrite({
-  address: "address of the retired TCO2 token you redeemed",
-  abi: toucanCarbonOffset.abi,
-  functionName: "retire",
-  args: [parseEther("1.0")],
-});
-const { data, isLoading, isSuccess, write } = useContractWrite(config);
-```
-
-### 2.2.3. Get a certificate
-
-If you want to create certificates afterwards, you can als just do that with [`mintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/retirement-certificates#mintcertificate) from the RetirementCertificates Contract.
-
-### 2.2.4. Find more functionalities
-
-Please check the table for link to the docs for each specific contract. You can also find all current deployed contacts on the [Toucan App](https://app.toucan.earth/contracts).
-
-| Contract                                                                                                          | Function                   | Description                                                                                                                                                                                                                                                                                              |
-| ----------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [PoolContracts (e.g. NCT)](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts)         | `redeemAuto`               | Automatically redeems pool tokens for underlying TCO2 tokens. This is 1:1 and doesn't incur fees. But you will receive what are considered lower quality TCO2s based on an arbitrary index called scoredTCO2s (to be explained further down below). The user's pool tokens get burnt within the process. |
-| [PoolContracts (e.g. NCT)](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts)         | `redeemAuto2`              | `redeemAuto2` acts very similar to `redeemAuto` but it also returns arrays of the redeemed TCO2s. This uses more gas but it is going to be more optimal to use by other on-chain contracts.                                                                                                              |
-| [PoolContracts (e.g. NCT)](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts)         | `getScoredTCO2s`           | Returns an array of ranked TCO2 addresses. scoredTCO2s[0] being the lowest rank, the rank is then ascending. You want to call this function if you are planning to retire specific TCO2s. Or specifically TCO2s with a higher ranking.                                                                   |
-| [PoolContracts (e.g. NCT)](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts)         | `redeemMany`               | Selectively redeems pool tokens for underlying TCO2 tokens. This is 1:1 minus fees. The user's pool tokens get burnt within the process.                                                                                                                                                                 |
-| [Toucan Carbon Offset](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2)                       | `retire`                   | You retire a given amount of CO2 tons. The tokens get burnt and this achieves the offset. This also emits a Retired event.                                                                                                                                                                               |
-| [Toucan Carbon Offset](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2)                       | `retireFrom`               | Achieves similar functionality as retire(), but instead of retiring from the callers address, it does so from the given address. This allow for pools or third party contracts to retire for the user.                                                                                                   |
-| [Toucan Carbon Offset](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2)                       | `retireAndMintCertificate` | Just as retire() this retires an amount of TCO2, but after the Retired event is emited this function mints a certificate passing the given retirementEventId.                                                                                                                                            |
-| [Retirement Certificates](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/retirement-certificates) | `mintCertificate`          | Mints a new RetirementCertificates NFT based on existent Retired events. The function can either be called by a valid TCO2 contract (in its retireAndMintCertificate() function) or by a user who owns Retired events.                                                                                   |
-
-3. Use a the SDK to query the subgraph
-
-Find all Toucan Subgraphs in our [Documentation](https://docs.toucan.earth/toucan/dev-resources/subgraph).
-
-There's a lot more other pre-built subgraph queries that I could show you, but what I really want to show you is the `fetchCustomQuery` method.
-
-This allows you to fetch with your own queries and can be very powerful if you know graphQL.
-
-- Getting your redeemed Tokens (TCO2s) you hold - useful for retirement of carbon credits.
-
-```typescript
-import { gql } from "@urql/core";
+```tsx
+import { parseEther } from "ethers/lib/utils.js";
+import { useState } from "react";
 import { ToucanClient } from "toucan-sdk";
+import { useProvider, useSigner } from "wagmi";
 
-const provider = useProvider();
-const { data: signer, isError, isLoading } = useSigner();
+export default function Home() {
+  const provider = useProvider();
+  const { data: signer, isError, isLoading } = useSigner();
+  const toucan = new ToucanClient("alfajores", provider);
+  signer && toucan.setSigner(signer);
+  const [tco2address, setTco2address] = useState("");
 
-const toucan = new ToucanClient("alfajores");
-const query = gql`
-  query ($id: String) {
-    user(id: $id) {
-      redeemsCreated {
-        token {
-          address
-          name
-        }
-      }
-    }
-  }
-`;
+  const retirePoolToken = async (): Promise<void> => {
+    const redeemedTokenAddress = await toucan.redeemAuto2(
+      "NCT",
+      parseEther("1")
+    );
+    redeemedTokenAddress && setTco2address(redeemedTokenAddress[0].address);
 
-const result = await toucan.fetchCustomQuery(query, { id: "Ox000" });
+    tco2address.length && (await toucan.retire(parseEther("1.0"), tco2address));
+  };
+
+  return (
+    <div>
+      <div className="h1">
+        <div>
+          <button
+            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={() => retirePoolToken()}
+          >
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3"></span>
+            {"Retire Tokens"}
+          </button>
+        </div>{" "}
+      </div>
+    </div>
+  );
+}
 ```
 
-- Getting all infos on a project of a Carbon Credit
+</details>
+
+# 3. Creating a list of our retirements
+
+In the last step, let's create a list showing our retirements. First we will create a new `list.tsx` page.
+
+There we need the ToucanClient. But, we won't need a provider or signer for querying the subgraph.
 
 ```typescript
-import { gql } from "@urql/core";
-import { ToucanClient } from "toucan-sdk";
-
-const provider = useProvider();
-const { data: signer, isError, isLoading } = useSigner();
-
 const toucan = new ToucanClient("alfajores");
-
-const query = gql`
-  query ($id: String) {
-    project(id: $id) {
-      projectId
-      region
-      standard
-      methodology
-      vintages {
-        id
-      }
-    }
-  }
-`;
-
-const result = await toucan.fetchCustomQuery(query, { id: "1" });
 ```
+
+The Toucan SDK has several pre-defined queries to get data from the subgraph, but you can also create your customized query with `toucan.fetchCustomQuery()`.
+
+But now we will use one of the predefined queries to get a list of our retirements. Remember that an address always needs to be lower case for querying, otherwise you won't get any results.
+
+```typescript
+await toucan.fetchUserRetirements(address?.toLowerCase());
+```
+
+Now let's add some code to display out retirements in a table.
+
+<details>
+<summary>And now our code should look like this now: </summary>
+
+```tsx
+import { useEffect, useState } from "react";
+import { ToucanClient } from "toucan-sdk";
+import { useAccount } from "wagmi";
+
+export default function Sdk() {
+  const toucan = new ToucanClient("alfajores");
+  const { address } = useAccount();
+
+  const [retirements, setRetirements] = useState([]);
+
+  useEffect(() => {
+    !retirements.length && getUserRetirements();
+  });
+
+  const getUserRetirements = async () => {
+    const result = await toucan.fetchUserRetirements(address?.toLowerCase());
+    result && setRetirements(result);
+  };
+
+  return (
+    <div>
+      <div className="flex min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full space-y-8">
+          <div className="">
+            <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-blue-900">
+              My Retirements{" "}
+            </h2>
+          </div>
+          <div className="flex justify-center"></div>
+          <div className="relative overflow-x-auto">
+            <table className="w-full text-sm text-left text-blue-500 dark:text-blue-400">
+              <thead className="text-xs text-blue-700 uppercase bg-blue-50 dark:bg-blue-700 dark:text-blue-400">
+                <tr>
+                  <th className="px-6 py-3">Token name</th>
+                  <th className="px-6 py-3">Token symbol</th>
+                  <th className="px-6 py-3">Certificate ID</th>
+                  <th className="px-6 py-3">Creation Transaction</th>
+                </tr>
+              </thead>
+              <tbody>
+                {retirements.length &&
+                  retirements.map((item) => {
+                    return (
+                      <tr
+                        className="bg-white border-b dark:bg-blue-800 dark:border-blue-700"
+                        key={item.id}
+                      >
+                        <td className="px-6 py-4 font-medium text-blue-900 whitespace-nowrap dark:text-white">
+                          {item.token.name}
+                        </td>
+                        <td className="px-6 py-4">{item.token.symbol}</td>
+                        <td className="px-6 py-4">{item.certificate?.id}</td>
+                        <td className="px-6 py-4">{item.creationTx}</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+</details>
