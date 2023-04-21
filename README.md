@@ -1,13 +1,11 @@
 # Tutorial for Carbon retirement on Celo
 
 In this Tutorial we will learn how retire carbon credits on Celo, using Celo Composer and the Toucan SDK.
-What we are going to do more in detail is the following: we will first get NCTs. These are carbon pool tokens, which means, we can get them at a DEX like [Ubeswap](https://ubeswap.org). Then we will redeem them for TCO2s which are tokenized Carbon Certificate. They hold all attributes about the project that created them. These tokens can then be retired and you can receive a certificate for that.
-For everybody who is new to the Voluntary Carbon Markets, let me quickly explain, why we need the pool tokens. Carbon Credits vary in their attributes depending on the project that issued them like country, year off issuance etc... Actually the symbol of TCO2 already gives you some information about the project. E.g. `TCO2-VCS-<projectId>-YYYY`, shows you that the credit comes from a project from the Verified Carbon Standard crediting program, the projectId and the vintage starts YYYY/01/01 and ends YYYY/12/31. If the vintage's start and end are not both exactly aligned to year boundaries one year apart then the format is instead TCO2-VCS-<projectId>-YYYYMMDD where YYYYMMDD is the vintage start date.
+What we are going to do more in detail is the following: we will first get NCTs. These are carbon pool tokens, which means, we can get them at a DEX like [Ubeswap](https://ubeswap.org). Then we will redeem them for TCO2s which are tokenized Carbon Certificate. They hold all attributes about the project that created them. These tokens can then be retired and you can receive a certificate for that. In the end we will also learn how to query the [subgraph](https://thegraph.com/hosted-service/subgraph/toucanprotocol/alfajores), when building a page to show the users retirements.
 
-Here `TCO2-` general term for fungible tokenized carbon credits serves as a prefix, followed by an information-rich name that includes the registry of origin, the project, the vintage, and so on.
+For everybody who is new to the Voluntary Carbon Markets, let me quickly explain, why we need the pool tokens. Carbon Credits vary in their attributes depending on the project that issued them like country, year off issuance etc... Here `TCO2-` a general term for fungible tokenized carbon credits serves as a prefix, followed by an information-rich name that includes the registry of origin, the project, the vintage, and so on. Actually the symbol of TCO2s already gives you some information about the project. E.g. `TCO2-VCS-<projectId>-YYYY`, shows you that the credit comes from a project from the Verified Carbon Standard crediting program, the projectId and the vintage starts YYYY/01/01 and ends YYYY/12/31. If the vintage's start and end are not both exactly aligned to year boundaries one year apart then the format is instead `TCO2-VCS-<projectId>-YYYYMMDD` where YYYYMMDD is the vintage start date.
 
-As a solution to the resulting liquidity problem, Toucan has created a pool infrastructure where tokens that fulfill certain criteria can be
-In the end we will also learn how to query the [subgraph](https://thegraph.com/hosted-service/subgraph/toucanprotocol/alfajores), when building a page to show the users retirements.
+Coming back to why we have two kind of tokens: As a solution to the resulting liquidity problem, Toucan has created a pool infrastructure where tokens that fulfil certain criteria can be deposited in exchange for pool tokens.
 
 1. Install Celo-Composer
 2. Retire Carbon Credits: Either use the Toucan SDK or interact directly with the Toucan Contracts
@@ -16,15 +14,15 @@ In the end we will also learn how to query the [subgraph](https://thegraph.com/h
       2.1. Install the SDK  
       2.2. Get Toucan Client  
       2.3. Redeem Tokens form a PoolContract (e.g. NCT)  
-      2.4. Retire your TCO2s  
+      2.4. Retire our TCO2s  
       2.5. Get a certificate  
       2.6. Interact with Toucan's Contracts
 
 3. Creating a list of our retirements
 
-## 1. Install [Celo-Composer](https://docs.celo.org/blog/tutorials/building-your-first-smart-contract-web-dapp-with-celo-composer)
+## 1. Install [Celo-Composer](https://docs.celo.org/blog/tutorials/building-our-first-smart-contract-web-dapp-with-celo-composer)
 
-We will use [Celo-Composer](https://docs.celo.org/blog/tutorials/building-your-first-smart-contract-web-dapp-with-celo-composer) to quick-start our web3 application. It already comes with several wallet integrations using [rainbow-kit](https://www.rainbowkit.com), [wagmi](https://wagmi.sh) for easy interactions with the blockchain and [tailwind](https://tailwindcss.com).
+We will use [Celo-Composer](https://docs.celo.org/blog/tutorials/building-our-first-smart-contract-web-dapp-with-celo-composer) to quick-start our web3 application. It already comes with several wallet integrations using [rainbow-kit](https://www.rainbowkit.com), [wagmi](https://wagmi.sh) for easy interactions with the blockchain and [tailwind](https://tailwindcss.com).
 
 ```
 npx @celo/celo-composer create
@@ -34,7 +32,7 @@ To create a simple example project we just chose the default, except for `Choose
 
 ![image of the options selected](./assets/composer-selection.jpg)
 
-Great. Now let's open the project in your favorite IDE (e.g. VS Code).
+Great. Now let's open the project in our favorite IDE (e.g. VS Code).
 
 First navigate into the react-app.
 
@@ -51,7 +49,7 @@ npm i
 or
 
 ```
-yarn;
+yarn
 ```
 
 ---
@@ -143,7 +141,7 @@ To retire Carbon Credits need pool tokens (e.g.NCTs) or TCO2. We can get them fr
 
 We can auto-redeem the Pool tokens with [`redeemAuto2`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts#redeemauto2), where they are exchanged for the lowest ranking TCO2s. Auto-redeem also returns the addresses of the redeemed TCO2s, which we need for the next step. As arguments for the function, we will need the current address of the pool symbol, that we want to retire, like "NCT". We will also need to input the amount of tokens we wish to retire. We can read more upon the functions in our [documentation](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/pool-contracts).
 
-If we want to choose the TCO2s that we want to retire, we can get a list of all TCO2 with `getScoredTCO2s` and then select the ones we prefer. Currently scored TCO2 means, that the tokens are sorted by year with scoredTokens[0] being the lowest. When getting the highest TCO2, make sure that the balance of the token is not 0. When we've chosen then ones we want to redeem your pool tokens for (we can choose several) we can redeem them with `redemMany`. For this Toucan Protocol takes fees. We can calculate the fee beforehand with `calculateRedeemFees`.
+If we want to choose the TCO2s that we want to retire, we can get a list of all TCO2 with `getScoredTCO2s` and then select the ones we prefer. Currently scored TCO2 means, that the tokens are sorted by year with scoredTokens[0] being the lowest. When getting the highest TCO2, make sure that the balance of the token is not 0. When we've chosen then ones we want to redeem our pool tokens for (we can choose several) we can redeem them with `redemMany`. For this Toucan Protocol takes fees. We can calculate the fee beforehand with `calculateRedeemFees`.
 
 But today we stay simple with `redeemauto2`:
 
@@ -205,17 +203,17 @@ And that makes sense, because we are not yet connected with our wallet. So let's
 | :eyeglasses: Try it out and check the transaction on [Celoscan](https://alfajores.celoscan.io) :eyeglasses: |
 | ----------------------------------------------------------------------------------------------------------- |
 
-## 2.4. Retire your TCO2s
+## 2.4. Retire TCO2s
 
-After **_Redeeming_** your pool tokens for TCO2s we will be able to retire them. We can only retire **TCO2s** tokens. We can either choose to simply [`retire`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retire) or if we would like to retire for a third party use the [`retireFrom`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retirefrom) function. Lastly we can also already get a certificate created with [` retireAndMintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retireandmintcertificate). - [Example ABI](https://github.com/ToucanProtocol/contracts/blob/main/artifacts/staging/celo-alfajores/ToucanCarbonOffsets.json)
+After **_Redeeming_** our pool tokens for TCO2s we will be able to retire them. We can only retire **TCO2s** tokens. We can either choose to simply [`retire`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retire) or if we would like to retire for a third party use the [`retireFrom`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retirefrom) function. Lastly we can also already get a certificate created with [` retireAndMintCertificate`](https://docs.toucan.earth/toucan/dev-resources/smart-contracts/tco2#retireandmintcertificate). - [Example ABI](https://github.com/ToucanProtocol/contracts/blob/main/artifacts/staging/celo-alfajores/ToucanCarbonOffsets.json)
 
-The first thing we will have to do, will be to get the address of your TCO2 token. We will have saved that as return value form `autoRedeem2` or from when we selected the tokens. And now we can retire our token, with adding this line of code to our redeem function.
+The first thing we will have to do, will be to get the address of our TCO2 token. We will have saved that as return value form `autoRedeem2` or from when we selected the tokens. And now we can retire our token, with adding this line of code to our redeem function.
 
 ```typescript
 await toucan.retire(parseEther("1.0"), tco2Address);
 ```
 
-Let's rename our function to `retirePoolToken` as well as the button to match the actual action that we are doing.
+Let's create a second function called `retirePoolToken` as well as a button for the retirement process.
 
 <details>
 <summary>Our code should look like this now: </summary>
@@ -233,13 +231,15 @@ export default function Home() {
   signer && toucan.setSigner(signer);
   const [tco2address, setTco2address] = useState("");
 
-  const retirePoolToken = async (): Promise<void> => {
+  const redeemPoolToken = async (): Promise<void> => {
     const redeemedTokenAddress = await toucan.redeemAuto2(
       "NCT",
       parseEther("1")
     );
     redeemedTokenAddress && setTco2address(redeemedTokenAddress[0].address);
+  };
 
+  const retirePoolToken = async (): Promise<void> => {
     tco2address.length && (await toucan.retire(parseEther("1.0"), tco2address));
   };
 
@@ -247,6 +247,13 @@ export default function Home() {
     <div>
       <div className="h1">
         <div>
+          <button
+            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={() => redeemPoolToken()}
+          >
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3"></span>
+            {"Redeem Tokens"}
+          </button>
           <button
             className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             onClick={() => retirePoolToken()}
@@ -273,7 +280,7 @@ There we need the ToucanClient. But, we won't need a provider or signer for quer
 const toucan = new ToucanClient("alfajores");
 ```
 
-The Toucan SDK has several pre-defined queries to get data from the subgraph, but we can also create your customized query with `toucan.fetchCustomQuery()`. We can create your check all schemes, create and test your query in the [playground](https://thegraph.com/hosted-service/subgraph/toucanprotocol/alfajores) of the Toucan Subgraph.
+The Toucan SDK has several pre-defined queries to get data from the subgraph, but we can also create our customized query with `toucan.fetchCustomQuery()`. We can check all schemes, create and test our query in the [playground](https://thegraph.com/hosted-service/subgraph/toucanprotocol/alfajores) of the Toucan Subgraph.
 
 But now we will use one of the predefined queries to get a list of our retirements. Remember that an address always needs to be lower case for querying, otherwise we won't get any results.
 
