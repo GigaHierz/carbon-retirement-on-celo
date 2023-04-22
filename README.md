@@ -14,7 +14,7 @@ Coming back to why we have two kind of tokens: As a solution to the resulting li
       2.1. Install the SDK  
       2.2. Get Toucan Client  
       2.3. Redeem Tokens form a PoolContract (e.g. NCT)  
-      2.4. Retire our TCO2s  
+      2.4. Retire TCO2s  
       2.5. Get a certificate  
       2.6. Interact with Toucan's Contracts
 
@@ -93,7 +93,7 @@ When using the Toucan SDK we want to first instantiate the ToucanClient and set 
 So in the `index.tsx` file we will add the imports to the top:
 
 ```typescript
-import { ToucanClient } from "toucan-sdk";
+import ToucanClient from "toucan-sdk";
 import { useProvider, useSigner } from "wagmi";
 ```
 
@@ -120,6 +120,7 @@ export default function Home() {
 
   const toucan = new ToucanClient("alfajores", provider);
   signer && toucan.setSigner(signer);
+
   return (
     <div>
       <div className="h1">
@@ -239,7 +240,7 @@ export default function Home() {
     redeemedTokenAddress && setTco2address(redeemedTokenAddress[0].address);
   };
 
-  const retirePoolToken = async (): Promise<void> => {
+  const retireTco2Token = async (): Promise<void> => {
     tco2address.length && (await toucan.retire(parseEther("1.0"), tco2address));
   };
 
@@ -256,7 +257,7 @@ export default function Home() {
           </button>
           <button
             className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            onClick={() => retirePoolToken()}
+            onClick={() => retireTco2Token()}
           >
             <span className="absolute inset-y-0 left-0 flex items-center pl-3"></span>
             {"Retire Tokens"}
@@ -295,23 +296,26 @@ Now let's add some code to display out retirements in a table.
 
 ```tsx
 import { useEffect, useState } from "react";
-import { ToucanClient } from "toucan-sdk";
+import ToucanClient, { fetchUserRetirementsResult } from "toucan-sdk";
 import { useAccount } from "wagmi";
 
 export default function Sdk() {
   const toucan = new ToucanClient("alfajores");
   const { address } = useAccount();
 
-  const [retirements, setRetirements] = useState([]);
+  const [retirements, setRetirements] = useState<fetchUserRetirementsResult[]>(
+    []
+  );
+
+  const getUserRetirements = async () => {
+    const result =
+      address && (await toucan.fetchUserRetirements(address?.toLowerCase()));
+    result && setRetirements(result);
+  };
 
   useEffect(() => {
     !retirements.length && getUserRetirements();
   });
-
-  const getUserRetirements = async () => {
-    const result = await toucan.fetchUserRetirements(address?.toLowerCase());
-    result && setRetirements(result);
-  };
 
   return (
     <div>
@@ -323,19 +327,20 @@ export default function Sdk() {
             </h2>
           </div>
           <div className="flex justify-center"></div>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left text-blue-500 dark:text-blue-400">
-              <thead className="text-xs text-blue-700 uppercase bg-blue-50 dark:bg-blue-700 dark:text-blue-400">
-                <tr>
-                  <th className="px-6 py-3">Token name</th>
-                  <th className="px-6 py-3">Token symbol</th>
-                  <th className="px-6 py-3">Certificate ID</th>
-                  <th className="px-6 py-3">Creation Transaction</th>
-                </tr>
-              </thead>
-              <tbody>
-                {retirements.length &&
-                  retirements.map((item) => {
+
+          {retirements.length ? (
+            <div className="relative overflow-x-auto">
+              <table className="w-full text-sm text-left text-blue-500 dark:text-blue-400">
+                <thead className="text-xs text-blue-700 uppercase bg-blue-50 dark:bg-blue-700 dark:text-blue-400">
+                  <tr>
+                    <th className="px-6 py-3">Token name</th>
+                    <th className="px-6 py-3">Token symbol</th>
+                    <th className="px-6 py-3">Certificate ID</th>
+                    <th className="px-6 py-3">Creation Transaction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {retirements.map((item) => {
                     return (
                       <tr
                         className="bg-white border-b dark:bg-blue-800 dark:border-blue-700"
@@ -350,9 +355,12 @@ export default function Sdk() {
                       </tr>
                     );
                   })}
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div>You don't have retired any carbon credits yet</div>
+          )}
         </div>
       </div>
     </div>
