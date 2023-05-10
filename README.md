@@ -116,7 +116,7 @@ Add the Toucan SDK.
 
 ```
 
-npm i toucan-sdk@1.0.0-beta
+npm i toucan-sdk
 
 ```
 
@@ -124,7 +124,7 @@ or
 
 ```
 
-yarn add toucan-sdk@1.0.0-beta
+yarn add toucan-sdk
 
 ```
 
@@ -365,12 +365,10 @@ import { useEffect, useState } from "react";
 import ToucanClient, { fetchUserRetirementsResult } from "toucan-sdk";
 import { useAccount } from "wagmi";
 
-export default function Sdk() {
+export default function List() {
   const toucan = new ToucanClient("alfajores");
   const { address } = useAccount();
-  const [retirements, setRetirements] = useState<fetchUserRetirementsResult[]>(
-    []
-  );
+  const [retirements, setRetirements] = useState([]);
 
   const getUserRetirements = async () => {
     const result =
